@@ -27,7 +27,7 @@ impl State {
     }
 }
 
-fn run(file_path: &str) {
+fn find_count(file_path: &str) -> u32 {
     let file = File::open(file_path).unwrap();
 
     let mut nums = BufReader::new(file)
@@ -44,11 +44,21 @@ fn run(file_path: &str) {
         state.step(num);
     }
 
-    println!("{}", state.increases);
+    state.increases
 }
 
 fn main() {
     for arg in args().skip(1) {
-        run(&arg);
+        println!("{}", find_count(&arg));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn find_count_test() {
+        assert_eq!(find_count("input/day-1.txt"), 1567);
     }
 }
