@@ -3,6 +3,11 @@ use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
 
+enum Param {
+    Ogr,
+    Csr,
+}
+
 fn bits_in_use(v: &u16) -> u8 {
     for n in 0..16 {
         if *v < (1 << n) {
@@ -25,38 +30,26 @@ fn most_common_at_pos(bit_pos: u8, nums: &[u16]) -> bool {
 
     if zero_cnt <= one_cnt {
         true
-    } else  {
+    } else {
         false
     }
 }
 
-fn find_ogr(input: Vec<u16>, bits: u8) -> u16 {
+fn find(param: Param, input: Vec<u16>, bits: u8) -> u16 {
     let mut remaining = input;
 
     for b in (0..bits).rev() {
         let most_common_at_b = most_common_at_pos(b, &remaining);
+        let least_common_at_b = !most_common_at_b;
+
+        let target = match param {
+            Param::Ogr => most_common_at_b,
+            Param::Csr => least_common_at_b,
+        };
 
         remaining = remaining
             .into_iter()
-            .filter(|n| bit_at_pos(b, *n) == most_common_at_b)
-            .collect();
-
-        if remaining.len() <= 1 {
-            break;
-        }
-    }
-    return *remaining.first().unwrap();
-}
-
-fn find_csr(input: Vec<u16>, bits: u8) -> u16 {
-    let mut remaining = input;
-
-    for b in (0..bits).rev() {
-        let least_common_at_b = !most_common_at_pos(b, &remaining);
-
-        remaining = remaining
-            .into_iter()
-            .filter(|n| bit_at_pos(b, *n) == least_common_at_b)
+            .filter(|n| bit_at_pos(b, *n) == target)
             .collect();
 
         if remaining.len() <= 1 {
@@ -73,8 +66,8 @@ fn find_ogr_csr(input: &mut dyn Read) -> (u32, u32) {
         .collect();
 
     let bits = numbers.iter().map(bits_in_use).max().unwrap();
-    let ogr = find_ogr(numbers.clone(), bits);
-    let csr = find_csr(numbers.clone(), bits);
+    let ogr = find(Param::Ogr, numbers.clone(), bits);
+    let csr = find(Param::Csr, numbers, bits);
 
     (ogr as u32, csr as u32)
 }
@@ -119,5 +112,16 @@ mod tests {
         assert_eq!(ogr, 23);
         assert_eq!(csr, 10);
         assert_eq!(ogr * csr, 230);
+    }
+
+    #[test]
+    fn test_full() {
+        use std::fs::File;
+        let mut f = File::open("input/day-3.txt").unwrap();
+        let (ogr, csr) = find_ogr_csr(&mut f);
+
+        assert_eq!(ogr, 781);
+        assert_eq!(csr, 2734);
+        assert_eq!(ogr * csr, 2135254);
     }
 }
