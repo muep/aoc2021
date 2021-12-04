@@ -1,4 +1,3 @@
-use std::io::stdin;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
@@ -40,9 +39,8 @@ fn find_gamma_epsilon(input: &mut dyn Read) -> (u32, u32) {
         })
 }
 
-fn main() {
-    let mut input = stdin();
-    let (gamma, epsilon) = find_gamma_epsilon(&mut input);
+pub fn run(input: &mut dyn Read) {
+    let (gamma, epsilon) = find_gamma_epsilon(input);
     println!("{} * {} -> {}", gamma, epsilon, gamma * epsilon);
 }
 

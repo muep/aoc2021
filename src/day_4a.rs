@@ -1,4 +1,3 @@
-use std::io::stdin;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
@@ -120,9 +119,8 @@ fn victory(marks: u32) -> bool {
     (0..5).any(|col| victory_on_col(col, marks)) || (0..5).any(|row| victory_on_row(row, marks))
 }
 
-fn main() {
-    let mut input = stdin();
-    let Victory { sum, last_num } = find_victory(&mut input);
+pub fn run(input: &mut dyn Read) {
+    let Victory { sum, last_num } = find_victory(input);
     println!("{} * {} -> {}", sum, last_num, sum as u32 * last_num as u32);
 }
 

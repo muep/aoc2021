@@ -1,7 +1,6 @@
-use std::env::args;
-use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
+use std::io::Read;
 
 #[derive(Debug)]
 struct State {
@@ -27,10 +26,8 @@ impl State {
     }
 }
 
-fn find_count(file_path: &str) -> u32 {
-    let file = File::open(file_path).unwrap();
-
-    let mut nums = BufReader::new(file)
+fn find_count(input: &mut dyn Read) -> u32 {
+    let mut nums = BufReader::new(input)
         .lines()
         .map(|x| x.unwrap().parse().unwrap());
 
@@ -47,18 +44,18 @@ fn find_count(file_path: &str) -> u32 {
     state.increases
 }
 
-fn main() {
-    for arg in args().skip(1) {
-        println!("{}", find_count(&arg));
-    }
+pub fn run(input: &mut dyn Read) {
+    println!("{}", find_count(input));
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::File;
 
     #[test]
     fn find_count_test() {
-        assert_eq!(find_count("input/day-1.txt"), 1567);
+        let mut f = File::open("input/day-1.txt").unwrap();
+        assert_eq!(find_count(&mut f), 1567);
     }
 }

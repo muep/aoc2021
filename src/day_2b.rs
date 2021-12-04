@@ -1,6 +1,3 @@
-use std::env::args;
-use std::fs::File;
-use std::io::stdin;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
@@ -60,11 +57,8 @@ fn find_pos(input: &mut dyn Read) -> Position {
     }
 }
 
-fn main() {
-    let position = match args().nth(1) {
-        Some(path) => find_pos(&mut File::open(path).unwrap()),
-        None => find_pos(&mut stdin()),
-    };
+pub fn run(input: &mut dyn Read) {
+    let position = find_pos(input);
 
     println!("{:?} => answer: {}", position, position.prod());
 }
@@ -72,6 +66,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::File;
 
     #[test]
     fn test_cmd() {

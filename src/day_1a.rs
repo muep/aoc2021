@@ -1,12 +1,9 @@
-use std::env::args;
-use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
+use std::io::Read;
 
-fn find_count(file_path: &str) -> u32 {
-    let file = File::open(file_path).unwrap();
-
-    let mut lines = BufReader::new(file).lines().map(|x| x.unwrap());
+fn find_count(input: &mut dyn Read) -> u32 {
+    let mut lines = BufReader::new(input).lines().map(|x| x.unwrap());
     let mut prev = lines.next().unwrap().parse::<u32>().unwrap();
     let mut cnt = 0;
 
@@ -21,18 +18,18 @@ fn find_count(file_path: &str) -> u32 {
     cnt
 }
 
-fn main() {
-    for arg in args().skip(1) {
-        println!("{}", find_count(&arg));
-    }
+pub fn run(input: &mut dyn Read) {
+    println!("{}", find_count(input));
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::File;
 
     #[test]
     fn find_count_test() {
-        assert_eq!(find_count("input/day-1.txt"), 1529);
+        let mut f = File::open("input/day-1.txt").unwrap();
+        assert_eq!(find_count(&mut f), 1529);
     }
 }

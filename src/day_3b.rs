@@ -1,4 +1,3 @@
-use std::io::stdin;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Read;
@@ -72,9 +71,8 @@ fn find_ogr_csr(input: &mut dyn Read) -> (u32, u32) {
     (ogr as u32, csr as u32)
 }
 
-fn main() {
-    let mut input = stdin();
-    let (ogr, csr) = find_ogr_csr(&mut input);
+pub fn run(input: &mut dyn Read) {
+    let (ogr, csr) = find_ogr_csr(input);
     println!("{} * {} -> {}", ogr, csr, ogr * csr);
 }
 
