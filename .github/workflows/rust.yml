@@ -22,3 +22,10 @@ jobs:
       run: cargo test --verbose
     - name: Run format check
       run: cargo fmt -- --check
+    - name: Build release mode
+      run: cargo build --release
+    - name: Archive the release executable
+      uses: actions/upload-artifact@v2
+      with:
+        name: target/release/aoc2021
+        path: aoc2021
