@@ -22,6 +22,7 @@ const CMDS: &[(&str, fn(&mut dyn Read))] = &[
     ("day-4a", day_4a::run),
     ("day-4b", day_4b::run),
     ("day-5a", day_5::run_part1),
+    ("day-5b", day_5::run_part2),
 ];
 
 fn find_cmd(name: &str) -> Option<fn(&mut dyn Read)> {

@@ -70,8 +70,56 @@ fn part1(input: &mut dyn Read) -> u32 {
     buf.into_iter().filter(|n| *n > 1).count() as u32
 }
 
+fn part2(input: &mut dyn Read) -> u32 {
+    let pitch = 1024;
+    let buf_sz = 1048576;
+    let mut buf: Vec<u16> = Vec::new();
+    buf.resize(buf_sz, 0);
+
+    for Line(p0, p1) in BufReader::new(input)
+        .lines()
+        .map(|l| Line::from_text(&l.unwrap()))
+    {
+        if p0.x == p1.x {
+            /* Vertical line */
+            let x = p0.x;
+            let (y_min, y_max) = ascending(p0.y, p1.y);
+            for y in y_min..=y_max {
+                buf[x as usize + pitch * (y as usize)] += 1;
+            }
+        } else if p0.y == p1.y {
+            /* Horizontal line */
+            let y = p0.y;
+            let (x_min, x_max) = ascending(p0.x, p1.x);
+            for x in x_min..=x_max {
+                buf[x as usize + pitch * (y as usize)] += 1;
+            }
+        } else if p0.x + p1.y == p0.y + p1.x {
+            /* Ascending diagonal */
+            let (x_min, x_max) = ascending(p0.x, p1.x);
+            let (y_min, y_max) = ascending(p0.y, p1.y);
+            for (x, y) in (x_min..=x_max).zip(y_min..=y_max) {
+                buf[x as usize + pitch * (y as usize)] += 1;
+            }
+        } else if p0.x + p0.y == p1.y + p1.x {
+            /* Descending diagonal */
+            let (x_min, x_max) = ascending(p0.x, p1.x);
+            let (y_min, y_max) = ascending(p0.y, p1.y);
+            for (x, y) in (x_min..=x_max).zip((y_min..=y_max).rev()) {
+                buf[x as usize + pitch * (y as usize)] += 1;
+            }
+        }
+    }
+
+    buf.into_iter().filter(|n| *n > 1).count() as u32
+}
+
 pub fn run_part1(input: &mut dyn Read) {
     println!("{}", part1(input));
+}
+
+pub fn run_part2(input: &mut dyn Read) {
+    println!("{}", part2(input));
 }
 
 #[cfg(test)]
@@ -98,5 +146,12 @@ mod tests {
         let mut f = File::open("input/day-5-sample.txt").unwrap();
         let res = part1(&mut f);
         assert_eq!(res, 5);
+    }
+
+    #[test]
+    fn test_part2_sample() {
+        let mut f = File::open("input/day-5-sample.txt").unwrap();
+        let res = part2(&mut f);
+        assert_eq!(res, 12);
     }
 }
