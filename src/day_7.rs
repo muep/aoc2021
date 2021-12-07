@@ -45,8 +45,12 @@ fn part1(input: &mut dyn Read) -> u32 {
         .sum()
 }
 
-fn part2_cost(pos: u32, crab: u32) -> u32 {
-    (0..absub_u32(pos, crab)).map(|a| a + 1).sum()
+fn part2_cost_lut(size: usize) -> Vec<u32> {
+    (0..=size as u32).map(|p| (0..=p).sum()).collect()
+}
+
+fn part2_cost(lut: &[u32], pos: u32, crab: u32) -> u32 {
+    lut[absub_u32(pos, crab) as usize]
 }
 
 fn part2(input: &mut dyn Read) -> u32 {
@@ -58,8 +62,10 @@ fn part2(input: &mut dyn Read) -> u32 {
         .skip(1)
         .fold(initial, |(omin, omax), c| expand(omin, *c, omax));
 
+    let lut = part2_cost_lut(max as usize);
+
     (min..=max)
-        .map(|pos| crabs.iter().map(|c| part2_cost(pos, *c)).sum())
+        .map(|pos| crabs.iter().map(|c| part2_cost(&lut, pos, *c)).sum())
         .min()
         .unwrap()
 }
