@@ -49,6 +49,10 @@ fn part2_cost(pos: u32, crab: u32) -> u32 {
     (0..absub_u32(pos, crab)).map(|a| a + 1).sum()
 }
 
+fn part2_attempt(crabs: &[u32], pos: u32) -> u32 {
+    crabs.iter().map(|c| part2_cost(pos, *c)).sum()
+}
+
 fn part2(input: &mut dyn Read) -> u32 {
     let crabs = load(input);
 
@@ -58,10 +62,37 @@ fn part2(input: &mut dyn Read) -> u32 {
         .skip(1)
         .fold(initial, |(omin, omax), c| expand(omin, *c, omax));
 
-    (min..=max)
-        .map(|pos| crabs.iter().map(|c| part2_cost(pos, *c)).sum())
-        .min()
-        .unwrap()
+    let mut range_min = min;
+    let mut range_max = max;
+    loop {
+        let hypothesis = (range_min + range_max) / 2;
+        let cost = part2_attempt(&crabs, hypothesis);
+
+        if range_min == range_max {
+            return cost;
+        }
+
+        let only_two = range_min + 1 == range_max;
+
+        let cost_fwd = part2_attempt(&crabs, hypothesis + 1);
+        if cost_fwd < cost {
+            if only_two {
+                return cost_fwd;
+            }
+
+            /* On descending slope. Keep looking right from the second
+             * hypothesis */
+            range_min = hypothesis + 1;
+        } else if cost < cost_fwd {
+            if only_two {
+                return cost;
+            }
+
+            /* On rising slope. Look on the left side of the first
+             * hypothesis */
+            range_max = hypothesis;
+        }
+    }
 }
 
 pub fn run_part1(input: &mut dyn Read) {
