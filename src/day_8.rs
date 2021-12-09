@@ -53,8 +53,8 @@ struct LineMapping {
     lines: [u8; 7],
 }
 
+#[allow(dead_code)]
 impl LineMapping {
-    #[allow(dead_code)]
     fn map(&self, mxbcd: MixedBcd) -> Bcd {
         self.lines
             .iter()
@@ -66,6 +66,10 @@ impl LineMapping {
                     bcd | (1 << mapped_line_number)
                 }
             })
+    }
+
+    fn with_line_order(line_order: [u8; 7]) -> LineMapping {
+        LineMapping { lines: line_order }
     }
 }
 
@@ -110,9 +114,7 @@ mod tests {
 
     #[test]
     fn test_linemapping() {
-        let mapping = LineMapping {
-            lines: [6, 0, 1, 2, 4, 3, 5],
-        };
+        let mapping = LineMapping::with_line_order([6, 0, 1, 2, 4, 3, 5]);
 
         assert_eq!(mapping.map(0b0000001), 0b1000000);
         assert_eq!(mapping.map(0b0000010), 0b0000001);
@@ -121,5 +123,10 @@ mod tests {
         assert_eq!(mapping.map(0b0010000), 0b0010000);
         assert_eq!(mapping.map(0b0100000), 0b0001000);
         assert_eq!(mapping.map(0b1000000), 0b0100000);
+
+        /* Some combinations as well */
+        assert_eq!(mapping.map(0b0011000), 0b0010100);
+        assert_eq!(mapping.map(0b0011010), 0b0010101);
+        assert_eq!(mapping.map(0b1111111), 0b1111111);
     }
 }
