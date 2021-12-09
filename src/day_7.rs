@@ -102,4 +102,16 @@ mod tests {
         assert_eq!(part1(&mut "1,1,5".as_bytes()), 4);
         assert_eq!(part1(&mut "1,1,5,10".as_bytes()), 13);
     }
+
+    #[test]
+    fn test_part1_full() {
+        let mut f = File::open("input/day-7.txt").unwrap();
+        assert_eq!(part1(&mut f), 355521);
+    }
+
+    #[test]
+    fn test_part2() {
+        let mut f = File::open("input/day-7.txt").unwrap();
+        assert_eq!(part2(&mut f), 100148777);
+    }
 }
