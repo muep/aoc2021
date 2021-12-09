@@ -202,8 +202,50 @@ impl PossibleMappings {
     }
 }
 
-fn part2(_input: &mut dyn Read) -> u32 {
-    5353
+fn pattern2bcd(pattern: &str) -> Bcd {
+    /* This gives a scrambled result */
+    pattern.chars().fold(0, |bits, c| match c {
+        'a' => bits | 1,
+        'b' => bits | 2,
+        'c' => bits | 4,
+        'd' => bits | 8,
+        'e' => bits | 16,
+        'f' => bits | 32,
+        'g' => bits | 64,
+        a => panic!("Unexpected char {} in pattern {}", a, pattern),
+    })
+}
+
+fn part2_line(line: &str) -> u32 {
+    let (patterns, nums): (Vec<&str>, &str) = {
+        let mut pieces = line.split(" | ");
+        let mut patterns: Vec<&str> = pieces.next().unwrap().split_whitespace().collect();
+        patterns.sort_by_key(|p| p.len());
+        let nums = pieces.next().unwrap();
+        (patterns, nums)
+    };
+
+    let mut possibles = PossibleMappings::anything();
+
+    for num in patterns.into_iter().map(pattern2bcd) {
+        possibles.insert_bcd(num);
+    }
+
+    let mapping = possibles.mapping();
+
+    nums.split_whitespace()
+        .map(pattern2bcd)
+        .map(|n| bcd2dec(mapping.map(n)))
+        .fold(0, |old, digit| old * 10 + digit as u32)
+}
+
+fn part2(input: &mut dyn Read) -> u32 {
+    use std::io::{BufRead, BufReader};
+
+    BufReader::new(input)
+        .lines()
+        .map(|l| part2_line(l.unwrap().as_str()))
+        .sum()
 }
 
 pub fn run_part2(input: &mut dyn Read) {
@@ -224,7 +266,12 @@ mod tests {
     #[test]
     fn test_part2_sample() {
         let mut f = File::open("input/day-8-sample.txt").unwrap();
-        assert_eq!(part2(&mut f), 5353);
+        assert_eq!(part2(&mut f), 61229);
+    }
+
+    #[test]
+    fn test_part2_line() {
+        assert_eq!(part2(&mut "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf".as_bytes()), 5353);
     }
 
     #[test]
