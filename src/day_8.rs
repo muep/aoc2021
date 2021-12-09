@@ -267,6 +267,18 @@ mod tests {
     }
 
     #[test]
+    fn test_part1_full() {
+        let mut f = File::open("input/day-8.txt").unwrap();
+        assert_eq!(part1(&mut f), 383);
+    }
+
+    #[test]
+    fn test_part2_full() {
+        let mut f = File::open("input/day-8.txt").unwrap();
+        assert_eq!(part2(&mut f), 998900);
+    }
+
+    #[test]
     fn test_part2_line() {
         assert_eq!(part2(&mut "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf".as_bytes()), 5353);
     }
