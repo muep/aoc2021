@@ -58,4 +58,15 @@ mod tests {
         assert_eq!(epsilon, 9);
         assert_eq!(gamma * epsilon, 198);
     }
+
+    #[test]
+    fn test_full() {
+        use std::fs::File;
+        let mut f = File::open("input/day-3.txt").unwrap();
+        let (gamma, epsilon) = find_gamma_epsilon(&mut f);
+
+        assert_eq!(gamma, 784);
+        assert_eq!(epsilon, 3311);
+        assert_eq!(gamma * epsilon, 2595824);
+    }
 }
