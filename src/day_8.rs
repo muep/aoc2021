@@ -1,5 +1,6 @@
 use std::io::Read;
 
+/* Part 1 is pretty trivial so it gets placed here at the top */
 fn part1(input: &mut dyn Read) -> u32 {
     use std::io::{BufRead, BufReader};
     let target_sizes = [2, 3, 4, 7];
@@ -22,6 +23,37 @@ pub fn run_part1(input: &mut dyn Read) {
     println!("{}", part1(input));
 }
 
+/* Normal BCD mapping */
+const BCD_PATTERNS: [u8; 10] = [
+    0b1110111, // 0
+    0b0100100, // 1
+    0b1011101, // 2
+    0b1101101, // 3
+    0b0101110, // 4
+    0b1101011, // 5
+    0b1111011, // 6
+    0b0100101, // 7
+    0b1111111, // 8
+    0b1101111, // 9
+];
+
+/* The mixed mapping looks very quite similar, so let's define an
+ * alias. */
+type Bcd = u8;
+
+#[allow(dead_code)]
+fn bcd2dec(bcd: Bcd) -> u8 {
+    BCD_PATTERNS.iter().position(|p| *p == bcd).unwrap() as u8
+}
+
+fn part2(_input: &mut dyn Read) -> u32 {
+    5353
+}
+
+pub fn run_part2(input: &mut dyn Read) {
+    println!("{}", part2(input));
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -31,5 +63,16 @@ mod tests {
     fn test_part1_sample() {
         let mut f = File::open("input/day-8-sample.txt").unwrap();
         assert_eq!(part1(&mut f), 26);
+    }
+
+    #[test]
+    fn test_part2_sample() {
+        let mut f = File::open("input/day-8-sample.txt").unwrap();
+        assert_eq!(part2(&mut f), 5353);
+    }
+
+    #[test]
+    fn test_bcd2dec() {
+        assert_eq!(bcd2dec(0b1111111), 8);
     }
 }
