@@ -145,4 +145,14 @@ mod tests {
         assert_eq!(sum, 188);
         assert_eq!(last_num, 24);
     }
+
+    #[test]
+    fn test_full() {
+        use std::fs::File;
+
+        let mut f = File::open("input/day-4.txt").unwrap();
+        let Victory { sum, last_num } = find_victory(&mut f);
+        assert_eq!(sum, 870);
+        assert_eq!(last_num, 41);
+    }
 }
