@@ -149,9 +149,23 @@ mod tests {
     }
 
     #[test]
+    fn test_part1_full() {
+        let mut f = File::open("input/day-5.txt").unwrap();
+        let res = part1(&mut f);
+        assert_eq!(res, 6397);
+    }
+
+    #[test]
     fn test_part2_sample() {
         let mut f = File::open("input/day-5-sample.txt").unwrap();
         let res = part2(&mut f);
         assert_eq!(res, 12);
+    }
+
+    #[test]
+    fn test_part2_full() {
+        let mut f = File::open("input/day-5.txt").unwrap();
+        let res = part2(&mut f);
+        assert_eq!(res, 22335);
     }
 }
