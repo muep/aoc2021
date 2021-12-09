@@ -41,7 +41,6 @@ const BCD_PATTERNS: [u8; 10] = [
  * alias. */
 type Bcd = u8;
 
-#[allow(dead_code)]
 fn bcd2dec(bcd: Bcd) -> u8 {
     BCD_PATTERNS.iter().position(|p| *p == bcd).unwrap() as u8
 }
@@ -64,7 +63,6 @@ struct LineMapping {
     lines: [u8; 7],
 }
 
-#[allow(dead_code)]
 impl LineMapping {
     fn map(&self, input: u8) -> u8 {
         self.lines
@@ -118,7 +116,6 @@ struct PossibleMappings {
     input_lines: [u8; 7],
 }
 
-#[allow(dead_code)]
 impl PossibleMappings {
     fn anything() -> PossibleMappings {
         PossibleMappings {
