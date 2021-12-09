@@ -89,4 +89,19 @@ mod tests {
         );
         assert_eq!(pos.prod(), 900);
     }
+
+    #[test]
+    fn test_full() {
+        let mut f = File::open("input/day-2.txt").unwrap();
+        let pos = find_pos(&mut f);
+        assert_eq!(
+            pos,
+            Position {
+                aim: 741,
+                depth: 642047,
+                distance: 1998
+            }
+        );
+        assert_eq!(pos.prod(), 1282809906);
+    }
 }
