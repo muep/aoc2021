@@ -41,9 +41,6 @@ const BCD_PATTERNS: [u8; 10] = [
  * alias. */
 type Bcd = u8;
 
-/* Same as Bcd, but with an arbitrary, typically unknown order */
-type MixedBcd = u8;
-
 #[allow(dead_code)]
 fn bcd2dec(bcd: Bcd) -> u8 {
     BCD_PATTERNS.iter().position(|p| *p == bcd).unwrap() as u8
@@ -55,12 +52,12 @@ struct LineMapping {
 
 #[allow(dead_code)]
 impl LineMapping {
-    fn map(&self, mxbcd: MixedBcd) -> Bcd {
+    fn map(&self, input: u8) -> u8 {
         self.lines
             .iter()
             .enumerate()
-            .fold(0, |bcd, (mixed_line_number, mapped_line_mask)| {
-                if (1 << mixed_line_number) & mxbcd == 0 {
+            .fold(0, |bcd, (input_line_number, mapped_line_mask)| {
+                if (1 << input_line_number) & input == 0 {
                     bcd
                 } else {
                     bcd | mapped_line_mask
