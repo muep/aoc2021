@@ -59,17 +59,27 @@ impl LineMapping {
         self.lines
             .iter()
             .enumerate()
-            .fold(0, |bcd, (mixed_line_number, mapped_line_number)| {
+            .fold(0, |bcd, (mixed_line_number, mapped_line_mask)| {
                 if (1 << mixed_line_number) & mxbcd == 0 {
                     bcd
                 } else {
-                    bcd | (1 << mapped_line_number)
+                    bcd | mapped_line_mask
                 }
             })
     }
 
     fn with_line_order(line_order: [u8; 7]) -> LineMapping {
-        LineMapping { lines: line_order }
+        LineMapping {
+            lines: [
+                1 << line_order[0],
+                1 << line_order[1],
+                1 << line_order[2],
+                1 << line_order[3],
+                1 << line_order[4],
+                1 << line_order[5],
+                1 << line_order[6],
+            ],
+        }
     }
 }
 
