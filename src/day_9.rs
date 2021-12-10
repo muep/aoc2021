@@ -66,9 +66,7 @@ fn neigh4(size: Size, point: Position) -> [Option<Position>; 4] {
     out
 }
 
-fn part1(input: &mut dyn Read) -> u32 {
-    let (cols, nums) = load(input);
-
+fn low_points(cols: usize, nums: &[u8]) -> Vec<Position> {
     let size = Size {
         cols: cols,
         rows: nums.len() / cols,
@@ -77,28 +75,30 @@ fn part1(input: &mut dyn Read) -> u32 {
     nums.iter()
         .enumerate()
         .map(|(pos, height)| {
-            let position = Position {
-                row: pos / size.cols,
-                col: pos % size.cols,
-            };
-
-            let neighbors = neigh4(size, position);
-            for neighbor in neighbors {
-                let Position { col, row } = match neighbor {
-                    Some(a) => a,
-                    None => {
-                        break;
-                    }
-                };
-
-                let height_at_neighbor = nums[col + size.cols * row];
-                if height_at_neighbor <= *height {
-                    return 0;
-                }
-            }
-
-            (*height + 1) as u32
+            (
+                Position {
+                    row: pos / size.cols,
+                    col: pos % size.cols,
+                },
+                *height,
+            )
         })
+        .filter(|(position, height)| {
+            neigh4(size, *position).iter().all(|n| match n {
+                None => true,
+                Some(n) => nums[n.col + size.cols * n.row] > *height,
+            })
+        })
+        .map(|(p, _)| p)
+        .collect()
+}
+
+fn part1(input: &mut dyn Read) -> u32 {
+    let (cols, nums) = load(input);
+
+    low_points(cols, &nums)
+        .iter()
+        .map(|p| (nums[p.col + cols * p.row] + 1) as u32)
         .sum()
 }
 
