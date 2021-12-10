@@ -66,6 +66,10 @@ fn neigh4(size: Size, point: Position) -> [Option<Position>; 4] {
     out
 }
 
+fn height_at(cols: usize, nums: &[u8], p: Position) -> u8 {
+    nums[p.col + cols * p.row]
+}
+
 fn low_points(cols: usize, nums: &[u8]) -> Vec<Position> {
     let size = Size {
         cols: cols,
@@ -86,7 +90,7 @@ fn low_points(cols: usize, nums: &[u8]) -> Vec<Position> {
         .filter(|(position, height)| {
             neigh4(size, *position).iter().all(|n| match n {
                 None => true,
-                Some(n) => nums[n.col + size.cols * n.row] > *height,
+                Some(n) => height_at(cols, nums, *n) > *height,
             })
         })
         .map(|(p, _)| p)
@@ -98,7 +102,7 @@ fn part1(input: &mut dyn Read) -> u32 {
 
     low_points(cols, &nums)
         .iter()
-        .map(|p| (nums[p.col + cols * p.row] + 1) as u32)
+        .map(|p| (height_at(cols, &nums, *p) + 1) as u32)
         .sum()
 }
 
