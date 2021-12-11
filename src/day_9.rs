@@ -149,16 +149,16 @@ fn basin(cols: usize, nums: &[u8], low: Position) -> Vec<Position> {
 fn part2(input: &mut dyn Read) -> u32 {
     let (cols, nums) = load(input);
 
-    let mut basins: Vec<Vec<Position>> = low_points(cols, &nums)
+    low_points(cols, &nums)
         .into_iter()
         .map(|p| basin(cols, &nums, p))
-        .collect();
-    basins.sort_by_key(|b| b.len() as isize * -1);
-    basins
-        .iter()
-        .take(3)
-        .map(|b| b.len() as u32)
-        .fold(1, |acc, l| acc * l)
+        .fold([0usize; 3], |max_sizes, basin| {
+            let mut buf = [basin.len(), max_sizes[0], max_sizes[1], max_sizes[2]];
+            buf.sort_by_key(|k| *k as isize * -1);
+            [buf[0], buf[1], buf[2]]
+        })
+        .into_iter()
+        .fold(1, |prod, sz| prod * sz as u32)
 }
 
 pub fn run_part1(input: &mut dyn Read) {
