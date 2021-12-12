@@ -109,8 +109,18 @@ fn part1(input: &mut dyn Read) -> u32 {
     world.flashes
 }
 
-fn part2(_: &mut dyn Read) -> u32 {
-    0
+fn part2(input: &mut dyn Read) -> u32 {
+    let mut world = World::from_input(input);
+    let mut prev_flashes = 0;
+    for n in 1..1000 {
+        world = world.step();
+        let flashes = world.flashes - prev_flashes;
+        if flashes as usize == world.nums.len() {
+            return n;
+        }
+        prev_flashes = world.flashes;
+    }
+    panic!("did not syncronize")
 }
 
 pub fn run_part1(input: &mut dyn Read) {
@@ -141,6 +151,12 @@ mod tests {
     #[test]
     fn test_part2_sample() {
         let mut f = File::open("input/day-11-sample.txt").unwrap();
-        assert_eq!(part2(&mut f), 0);
+        assert_eq!(part2(&mut f), 195);
+    }
+
+    #[test]
+    fn test_part2_full() {
+        let mut f = File::open("input/day-11.txt").unwrap();
+        assert_eq!(part2(&mut f), 788);
     }
 }
