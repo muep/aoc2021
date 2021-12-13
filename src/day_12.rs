@@ -61,11 +61,13 @@ fn load(input: &mut dyn Read) -> Network {
     Network { ncon }
 }
 
-fn routes(prefix: Vec<Node>, net: &Network, permit_small_twice: bool) -> Vec<Vec<Node>> {
+fn routes(prefix: &[Node], net: &Network, permit_small_twice: bool) -> Vec<Vec<Node>> {
     let here = prefix.last().unwrap();
     if *here == Node::End {
-        return vec![prefix];
+        return vec![prefix.to_vec()];
     }
+
+    let mut p = prefix.to_vec();
 
     net.ncon[&here]
         .iter()
@@ -84,9 +86,10 @@ fn routes(prefix: Vec<Node>, net: &Network, permit_small_twice: bool) -> Vec<Vec
             Node::End => Some((permit_small_twice, n)),
         })
         .map(|(permit_twice, next)| {
-            let mut p = prefix.clone();
             p.push(*next);
-            routes(p, net, permit_twice)
+            let res = routes(&p, net, permit_twice);
+            p.pop();
+            res
         })
         .flatten()
         .collect()
@@ -94,12 +97,12 @@ fn routes(prefix: Vec<Node>, net: &Network, permit_small_twice: bool) -> Vec<Vec
 
 fn part1(input: &mut dyn Read) -> u32 {
     let net = load(input);
-    routes(vec![Node::Start], &net, false).len() as u32
+    routes(&[Node::Start], &net, false).len() as u32
 }
 
 fn part2(input: &mut dyn Read) -> u32 {
     let net = load(input);
-    routes(vec![Node::Start], &net, true).len() as u32
+    routes(&[Node::Start], &net, true).len() as u32
 }
 
 pub fn run_part1(input: &mut dyn Read) {
