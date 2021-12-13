@@ -61,10 +61,12 @@ fn load(input: &mut dyn Read) -> Network {
     Network { ncon }
 }
 
-fn routes(prefix: Vec<Node>, net: &Network, permit_small_twice: bool) -> Vec<usize> {
+fn routes(prefix: Vec<Node>, net: &Network, permit_small_twice: bool) -> Vec<Vec<Node>> {
     let here = prefix.last().unwrap();
     if *here == Node::End {
-        return vec![prefix.len() + 1];
+        let mut route = prefix.clone();
+        route.push(*here);
+        return vec![route];
     }
 
     net.ncon[&here]
