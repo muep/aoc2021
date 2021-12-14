@@ -13,7 +13,7 @@ enum Fold {
     Y(u16),
 }
 
-fn load(input: &mut dyn Read) -> (Vec<Point>, Vec<Fold>) {
+fn load(input: &mut dyn Read) -> (HashSet<Point>, Vec<Fold>) {
     use std::io::{BufRead, BufReader};
 
     let (points, folds): (Vec<Option<Point>>, Vec<Option<Fold>>) = BufReader::new(input)
@@ -55,8 +55,8 @@ fn fold_scalar(a: u16, fold_at: u16) -> u16 {
     }
 }
 
-fn fold(points: Vec<Point>, f: Fold) -> Vec<Point> {
-    let res: HashSet<Point> = points
+fn fold(points: HashSet<Point>, f: Fold) -> HashSet<Point> {
+    points
         .into_iter()
         .map(|Point { col, row }| match f {
             Fold::Y(y) => Point {
@@ -68,8 +68,7 @@ fn fold(points: Vec<Point>, f: Fold) -> Vec<Point> {
                 row,
             },
         })
-        .collect();
-    res.into_iter().collect()
+        .collect()
 }
 
 fn part1(input: &mut dyn Read) -> u32 {
