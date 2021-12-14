@@ -5,6 +5,7 @@ use std::io::Read;
 mod day_10;
 mod day_11;
 mod day_12;
+mod day_13;
 mod day_1a;
 mod day_1b;
 mod day_2a;
@@ -45,6 +46,8 @@ const CMDS: &[(&str, fn(&mut dyn Read))] = &[
     ("day-12a", day_12::run_part1),
     ("day-12b", day_12::run_part2),
     ("day-12-dot", day_12::run_to_dot),
+    ("day-13a", day_13::run_part1),
+    ("day-13b", day_13::run_part2),
 ];
 
 fn find_cmd(name: &str) -> Option<fn(&mut dyn Read)> {
