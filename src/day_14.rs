@@ -2,7 +2,9 @@ use std::collections::HashMap;
 use std::io::Read;
 use std::iter::once;
 
-fn load(input: &mut dyn Read) -> (Vec<char>, HashMap<[char; 2], char>) {
+type Pair = [char; 2];
+
+fn load(input: &mut dyn Read) -> (Vec<char>, HashMap<Pair, char>) {
     use std::io::{BufRead, BufReader};
 
     let reader = BufReader::new(input);
@@ -32,13 +34,13 @@ fn load(input: &mut dyn Read) -> (Vec<char>, HashMap<[char; 2], char>) {
     (template, rules)
 }
 
-fn part1_step(rules: &HashMap<[char; 2], char>, polymer: Vec<char>) -> Vec<char> {
+fn part1_step(rules: &HashMap<Pair, char>, polymer: Vec<char>) -> Vec<char> {
     //println!("{:?}", polymer);
     polymer
         .windows(2)
         .map(|window| match window {
             &[cur, next] => {
-                let key: [char; 2] = [cur, next];
+                let key: Pair = [cur, next];
                 let result: Vec<char> = if let Some(insertion) = rules.get(&key) {
                     vec![cur, *insertion]
                 } else {
@@ -72,11 +74,11 @@ fn part1(input: &mut dyn Read) -> u32 {
 
 fn part2(input: &mut dyn Read) -> u64 {
     let (template, rules) = load(input);
-    let initial_pair_counts: HashMap<[char; 2], u64> = template
+    let initial_pair_counts: HashMap<Pair, u64> = template
         .windows(2)
         .map(|window| match window {
             &[e0, e1] => {
-                let pair: [char; 2] = [e0, e1];
+                let pair: Pair = [e0, e1];
                 pair
             }
             _ => panic!(),
@@ -87,10 +89,10 @@ fn part2(input: &mut dyn Read) -> u64 {
             cts
         });
 
-    let final_pair_counts: HashMap<[char; 2], u64> =
+    let final_pair_counts: HashMap<Pair, u64> =
         (0..40).fold(initial_pair_counts, |mut pair_counts, _| {
-            let mut additions: HashMap<[char; 2], u64> = HashMap::new();
-            let mut removals: HashMap<[char; 2], u64> = HashMap::new();
+            let mut additions: HashMap<Pair, u64> = HashMap::new();
+            let mut removals: HashMap<Pair, u64> = HashMap::new();
 
             for (rule_key, rule_val) in rules.iter() {
                 let old_cnt = match pair_counts.get(rule_key) {
@@ -102,8 +104,7 @@ fn part2(input: &mut dyn Read) -> u64 {
 
                 removals.insert(*rule_key, old_cnt);
 
-                let added_pairs: [[char; 2]; 2] =
-                    [[rule_key[0], *rule_val], [*rule_val, rule_key[1]]];
+                let added_pairs: [Pair; 2] = [[rule_key[0], *rule_val], [*rule_val, rule_key[1]]];
 
                 for p in added_pairs {
                     let prev_adds = *additions.get(&p).unwrap_or(&0);
