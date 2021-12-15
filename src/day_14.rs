@@ -34,6 +34,23 @@ fn load(input: &mut dyn Read) -> (Vec<char>, HashMap<Pair, char>) {
     (template, rules)
 }
 
+fn paircounts(polymer: &[char]) -> HashMap<Pair, u64> {
+    polymer
+        .windows(2)
+        .map(|window| match window {
+            &[e0, e1] => {
+                let pair: Pair = [e0, e1];
+                pair
+            }
+            _ => panic!(),
+        })
+        .fold(HashMap::new(), |mut cts, pair| {
+            let old = *cts.get(&pair).unwrap_or(&0);
+            cts.insert(pair, old + 1);
+            cts
+        })
+}
+
 fn part1_step(rules: &HashMap<Pair, char>, polymer: Vec<char>) -> Vec<char> {
     //println!("{:?}", polymer);
     polymer
@@ -74,20 +91,7 @@ fn part1(input: &mut dyn Read) -> u32 {
 
 fn part2(input: &mut dyn Read) -> u64 {
     let (template, rules) = load(input);
-    let initial_pair_counts: HashMap<Pair, u64> = template
-        .windows(2)
-        .map(|window| match window {
-            &[e0, e1] => {
-                let pair: Pair = [e0, e1];
-                pair
-            }
-            _ => panic!(),
-        })
-        .fold(HashMap::new(), |mut cts, pair| {
-            let old = *cts.get(&pair).unwrap_or(&0);
-            cts.insert(pair, old + 1);
-            cts
-        });
+    let initial_pair_counts = paircounts(&template);
 
     let final_pair_counts: HashMap<Pair, u64> =
         (0..40).fold(initial_pair_counts, |mut pair_counts, _| {
