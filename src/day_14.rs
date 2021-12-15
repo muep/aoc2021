@@ -3,6 +3,10 @@ use std::io::Read;
 use std::iter::once;
 
 type Pair = [char; 2];
+type Rules = HashMap<Pair, char>;
+
+// Something that never occurs in the elements used in the input.
+const TAIL: char = '\0';
 
 fn load(input: &mut dyn Read) -> (Vec<char>, HashMap<Pair, char>) {
     use std::io::{BufRead, BufReader};
@@ -14,7 +18,7 @@ fn load(input: &mut dyn Read) -> (Vec<char>, HashMap<Pair, char>) {
         .unwrap()
         .unwrap()
         .chars()
-        .chain(once('\0'))
+        .chain(once(TAIL)) // The last element needs to be in a pair
         .collect();
 
     assert!(lines.next().unwrap().unwrap().is_empty());
@@ -34,25 +38,7 @@ fn load(input: &mut dyn Read) -> (Vec<char>, HashMap<Pair, char>) {
     (template, rules)
 }
 
-fn paircounts(polymer: &[char]) -> HashMap<Pair, u64> {
-    polymer
-        .windows(2)
-        .map(|window| match window {
-            &[e0, e1] => {
-                let pair: Pair = [e0, e1];
-                pair
-            }
-            _ => panic!(),
-        })
-        .fold(HashMap::new(), |mut cts, pair| {
-            let old = *cts.get(&pair).unwrap_or(&0);
-            cts.insert(pair, old + 1);
-            cts
-        })
-}
-
 fn part1_step(rules: &HashMap<Pair, char>, polymer: Vec<char>) -> Vec<char> {
-    //println!("{:?}", polymer);
     polymer
         .windows(2)
         .map(|window| match window {
@@ -68,7 +54,7 @@ fn part1_step(rules: &HashMap<Pair, char>, polymer: Vec<char>) -> Vec<char> {
             _ => panic!(),
         })
         .flatten()
-        .chain(once('\0'))
+        .chain(once(TAIL))
         .collect()
 }
 
@@ -89,54 +75,77 @@ fn part1(input: &mut dyn Read) -> u32 {
     counts.values().max().unwrap() - counts.values().min().unwrap()
 }
 
+fn paircounts(polymer: &[char]) -> HashMap<Pair, u64> {
+    polymer
+        .windows(2)
+        .map(|window| match window {
+            &[e0, e1] => {
+                let pair: Pair = [e0, e1];
+                pair
+            }
+            _ => panic!(),
+        })
+        .fold(HashMap::new(), |mut cts, pair| {
+            let old = *cts.get(&pair).unwrap_or(&0);
+            cts.insert(pair, old + 1);
+            cts
+        })
+}
+
+fn pairwise_step(rules: &Rules, mut pair_counts: HashMap<Pair, u64>) -> HashMap<Pair, u64> {
+    let mut additions: HashMap<Pair, u64> = HashMap::new();
+    let mut removals: HashMap<Pair, u64> = HashMap::new();
+
+    for (rule_key, rule_val) in rules.iter() {
+        let old_cnt = match pair_counts.get(rule_key) {
+            None => {
+                continue;
+            }
+            Some(count) => *count,
+        };
+
+        removals.insert(*rule_key, old_cnt);
+
+        let added_pairs: [Pair; 2] = [[rule_key[0], *rule_val], [*rule_val, rule_key[1]]];
+
+        for p in added_pairs {
+            let prev_adds = *additions.get(&p).unwrap_or(&0);
+            additions.insert(p, prev_adds + old_cnt);
+        }
+    }
+
+    for (key, cnt) in additions {
+        let old = *pair_counts.get(&key).unwrap_or(&0);
+        pair_counts.insert(key, old + cnt);
+    }
+
+    for (key, cnt) in removals {
+        let old = *pair_counts.get(&key).unwrap_or(&0);
+        pair_counts.insert(key, old - cnt);
+    }
+
+    pair_counts
+}
+
+fn element_counts_from_pairs(pair_counts: HashMap<Pair, u64>) -> HashMap<char, u64> {
+    pair_counts
+        .iter()
+        .fold(HashMap::new(), |mut cts, (pair, cnt)| {
+            let old_cnt = *cts.get(&pair[0]).unwrap_or(&0);
+            cts.insert(pair[0], old_cnt + cnt);
+            cts
+        })
+}
+
 fn part2(input: &mut dyn Read) -> u64 {
     let (template, rules) = load(input);
     let initial_pair_counts = paircounts(&template);
 
-    let final_pair_counts: HashMap<Pair, u64> =
-        (0..40).fold(initial_pair_counts, |mut pair_counts, _| {
-            let mut additions: HashMap<Pair, u64> = HashMap::new();
-            let mut removals: HashMap<Pair, u64> = HashMap::new();
+    let final_pair_counts = (0..40).fold(initial_pair_counts, |pair_counts, _| {
+        pairwise_step(&rules, pair_counts)
+    });
 
-            for (rule_key, rule_val) in rules.iter() {
-                let old_cnt = match pair_counts.get(rule_key) {
-                    None => {
-                        continue;
-                    }
-                    Some(count) => *count,
-                };
-
-                removals.insert(*rule_key, old_cnt);
-
-                let added_pairs: [Pair; 2] = [[rule_key[0], *rule_val], [*rule_val, rule_key[1]]];
-
-                for p in added_pairs {
-                    let prev_adds = *additions.get(&p).unwrap_or(&0);
-                    additions.insert(p, prev_adds + old_cnt);
-                }
-            }
-
-            for (key, cnt) in additions {
-                let old = *pair_counts.get(&key).unwrap_or(&0);
-                pair_counts.insert(key, old + cnt);
-            }
-
-            for (key, cnt) in removals {
-                let old = *pair_counts.get(&key).unwrap_or(&0);
-                pair_counts.insert(key, old - cnt);
-            }
-
-            pair_counts
-        });
-
-    let counts: HashMap<char, u64> =
-        final_pair_counts
-            .iter()
-            .fold(HashMap::new(), |mut cts, (pair, cnt)| {
-                let old_cnt = *cts.get(&pair[0]).unwrap_or(&0);
-                cts.insert(pair[0], old_cnt + cnt);
-                cts
-            });
+    let counts = element_counts_from_pairs(final_pair_counts);
 
     counts.values().max().unwrap() - counts.values().min().unwrap()
 }
