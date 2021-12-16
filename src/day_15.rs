@@ -132,13 +132,43 @@ fn total_risk(mut map: Map) -> (u32, Vec<usize>) {
     )
 }
 
+fn load_part2(input: &mut dyn Read) -> Map {
+    let base_map = load(input);
+    let bcols = base_map.cols;
+    let brows = base_map.cells.len() / bcols;
+
+    let cols = bcols * 5;
+    let cells: Vec<Cell> = (0..(25 * base_map.cells.len()))
+        .map(|p| {
+            let row = p / cols;
+            let col = p % cols;
+
+            let srow = row / brows;
+            let brow = row % brows;
+            let scol = col / bcols;
+            let bcol = col % bcols;
+
+            let bpos = bcol + bcols * brow;
+            let local_risk =
+                1 + (base_map.cells[bpos].local_risk + srow as u8 + scol as u8 - 1) % 9;
+            Cell {
+                local_risk,
+                ..base_map.cells[bpos]
+            }
+        })
+        .collect();
+
+    Map { cells, cols }
+}
+
 fn part1(input: &mut dyn Read) -> (u32, Vec<usize>) {
     let map = load(input);
     total_risk(map)
 }
 
-fn part2(_: &mut dyn Read) -> u32 {
-    0
+fn part2(input: &mut dyn Read) -> u32 {
+    let map = load_part2(input);
+    total_risk(map).0
 }
 
 pub fn run_part1(input: &mut dyn Read) {
@@ -170,6 +200,12 @@ mod tests {
     #[test]
     fn test_part2_sample() {
         let mut f = File::open("input/day-15-sample.txt").unwrap();
-        assert_eq!(part2(&mut f), 0);
+        assert_eq!(part2(&mut f), 315);
+    }
+
+    #[test]
+    fn test_part2_full() {
+        let mut f = File::open("input/day-15.txt").unwrap();
+        assert_eq!(part2(&mut f), 2942);
     }
 }
