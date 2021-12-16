@@ -1,4 +1,3 @@
-use std::collections::BTreeSet;
 use std::io::Read;
 
 const UNKNOWN: u32 = u32::MAX;
@@ -7,6 +6,7 @@ struct Cell {
     local_risk: u8,
     cumulative_risk: u32,
     previous: usize,
+    visited: bool,
 }
 
 struct Map {
@@ -40,6 +40,7 @@ fn load(input: &mut dyn Read) -> Map {
             local_risk,
             cumulative_risk: UNKNOWN,
             previous: 0,
+            visited: false,
         })
         .collect();
 
@@ -75,45 +76,65 @@ fn offset(cols: usize, row: usize, col: usize) -> usize {
     col + cols * row
 }
 
-fn part1(input: &mut dyn Read) -> u32 {
-    let mut map = load(input);
+fn get_route(map: &Map, start: usize, dest: usize) -> Vec<usize> {
+    let mut res = vec![dest];
+    let mut here = dest;
+
+    while here != start {
+        here = map.cells[here].previous;
+        res.push(here);
+    }
+
+    res.reverse();
+    res
+}
+
+fn total_risk(mut map: Map) -> (u32, Vec<usize>) {
     let cols = map.cols;
     let rows = map.cells.len() / cols;
 
     let start = 0;
     let target = map.cells.len() - 1;
 
-    let mut visited: BTreeSet<usize> = BTreeSet::new();
+    let mut to_check: Vec<usize> = vec![start];
+    map.cells[start].cumulative_risk = 0;
 
-    let mut to_check: BTreeSet<(u32, usize)> = BTreeSet::new();
-    to_check.insert((0, start));
+    while let Some(here) = to_check.first().cloned() {
+        let local_cumulative = map.cells[here].cumulative_risk;
 
-    while let Some(cell) = to_check.iter().map(|c| *c).next() {
-        let (local_cumulative, here) = cell;
-        //println!("Checking cell {} with risk {}", here, local_cumulative);
-
-        // No need to check this cell again
-        to_check.remove(&cell);
-        visited.insert(here);
-
-        let neighbors: BTreeSet<(u32, usize)> = neighbors4(cols, rows, here)
+        map.cells[here].visited = true;
+        let neighbors: Vec<usize> = neighbors4(cols, rows, here)
             .into_iter()
-            .filter(|p| !visited.contains(p))
-            .map(|p| (local_cumulative + map.cells[p].local_risk as u32, p))
+            .filter(|p| !map.cells[*p].visited)
             .collect();
 
-        for (cumulative, pos) in neighbors.iter().cloned() {
-            //println!("Recording risk({}) = {}", pos, cumulative);
-            map.cells[pos].cumulative_risk = u32::min(cumulative, map.cells[pos].cumulative_risk);
-            map.cells[pos].previous = here;
+        for n in neighbors.iter().cloned() {
+            let n_cumulative = local_cumulative + map.cells[n].local_risk as u32;
+
+            map.cells[n].cumulative_risk = u32::min(map.cells[n].cumulative_risk, n_cumulative);
+            map.cells[n].previous = here;
+            if n == target {
+                return (n_cumulative, get_route(&map, start, target));
+            }
         }
 
-        //println!("Adding {:?} to be checked", neighbors);
-
-        to_check = to_check.union(&neighbors).cloned().collect();
+        to_check = to_check
+            .into_iter()
+            .filter(|p| *p != here)
+            .chain(neighbors.into_iter())
+            .collect();
+        to_check.sort_by_key(|p| map.cells[*p].cumulative_risk);
     }
 
-    map.cells[target].cumulative_risk
+    (
+        map.cells[target].cumulative_risk,
+        get_route(&map, start, target),
+    )
+}
+
+fn part1(input: &mut dyn Read) -> (u32, Vec<usize>) {
+    let map = load(input);
+    total_risk(map)
 }
 
 fn part2(_: &mut dyn Read) -> u32 {
@@ -121,7 +142,8 @@ fn part2(_: &mut dyn Read) -> u32 {
 }
 
 pub fn run_part1(input: &mut dyn Read) {
-    println!("{}", part1(input));
+    let (risk, route) = part1(input);
+    println!("total risk {}, going through {:?}", risk, route);
 }
 
 pub fn run_part2(input: &mut dyn Read) {
@@ -136,13 +158,13 @@ mod tests {
     #[test]
     fn test_part1_sample() {
         let mut f = File::open("input/day-15-sample.txt").unwrap();
-        assert_eq!(part1(&mut f), 40);
+        assert_eq!(part1(&mut f).0, 40);
     }
 
     #[test]
     fn test_part1_full() {
         let mut f = File::open("input/day-15.txt").unwrap();
-        assert_eq!(part1(&mut f), 707);
+        assert_eq!(part1(&mut f).0, 707);
     }
 
     #[test]
