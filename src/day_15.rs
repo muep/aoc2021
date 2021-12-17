@@ -192,20 +192,8 @@ mod tests {
     }
 
     #[test]
-    fn test_part1_full() {
-        let mut f = File::open("input/day-15.txt").unwrap();
-        assert_eq!(part1(&mut f).0, 707);
-    }
-
-    #[test]
     fn test_part2_sample() {
         let mut f = File::open("input/day-15-sample.txt").unwrap();
         assert_eq!(part2(&mut f), 315);
-    }
-
-    #[test]
-    fn test_part2_full() {
-        let mut f = File::open("input/day-15.txt").unwrap();
-        assert_eq!(part2(&mut f), 2942);
     }
 }
